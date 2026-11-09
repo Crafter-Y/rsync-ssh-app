@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/Crafter-Y/rsync-ssh-app/compare/v1.0.1...v1.0.2) (2026-11-09)
+
+### Bug Fixes
+
+* update dependencies and scope license metadata ([989b72b](https://github.com/Crafter-Y/rsync-ssh-app/commit/989b72bda04762b1b32f60a41758bda688ac0f87))
+
 ## [1.0.1](https://github.com/Crafter-Y/rsync-ssh-app/compare/v1.0.0...v1.0.1) (2026-11-09)
 
 ### Bug Fixes
