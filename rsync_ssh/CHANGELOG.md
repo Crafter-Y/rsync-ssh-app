@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/Crafter-Y/rsync-ssh-app/compare/v1.0.0...v1.0.1) (2026-11-09)
+
+### Bug Fixes
+
+* include creation timestamps in published image metadata ([4faf7f3](https://github.com/Crafter-Y/rsync-ssh-app/commit/4faf7f3bacfdbf6ca45e1989244529f46cd2056a))
+
 ## 1.0.0 (2026-11-09)
 
 ### Features
