@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import pwd
 import secrets
 import subprocess
 import sys
@@ -16,6 +17,18 @@ from rsync_ssh import SETTINGS, check_storage, open_directory
 def main():
     os.umask(0o077)
     options = json.loads(Path('/data/options.json').read_text())
+    username = options['username']
+    if not re.fullmatch(r'[a-z_][a-z0-9_-]{0,31}', username):
+        raise ValueError('username must be a valid lowercase Unix account name')
+    current = pwd.getpwuid(1000)
+    if current.pw_name != username:
+        try:
+            pwd.getpwnam(username)
+        except KeyError:
+            pass
+        else:
+            raise ValueError('username is already used by a system account')
+        subprocess.run(['usermod', '--login', username, current.pw_name], check=True)
     root = options['storage_root']
     directory = options['directory']
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}', directory):
@@ -59,14 +72,15 @@ def main():
     finally:
         os.close(fd)
 
-    Path('/etc/ssh/authorized_keys/backup').write_text(''.join(output))
-    Path('/etc/ssh/authorized_keys/backup').chmod(0o644)
-    SETTINGS.write_text(json.dumps({'root': root, 'directory': directory, 'identity': identity}))
+    authorized = Path('/etc/ssh/authorized_keys') / username
+    authorized.write_text(''.join(output))
+    authorized.chmod(0o644)
+    SETTINGS.write_text(json.dumps({'root': root, 'directory': directory, 'identity': identity, 'username': username}))
     SETTINGS.chmod(0o644)
 
     # Alpine creates locked accounts. Set an unguessable discarded password;
     # sshd still allows ONLY public-key authentication.
-    subprocess.run(['chpasswd'], input=f'backup:{secrets.token_urlsafe(64)}\n',
+    subprocess.run(['chpasswd'], input=f'{username}:{secrets.token_urlsafe(64)}\n',
                    text=True, check=True)
     hostkeys = Path('/data/hostkeys')
     hostkeys.mkdir(mode=0o700, exist_ok=True)
@@ -82,9 +96,12 @@ def main():
         subprocess.run(['ssh-keygen', '-l', '-f', str(key)], check=True)
 
     Path('/run/sshd').mkdir(mode=0o755, exist_ok=True)
-    subprocess.run(['/usr/sbin/sshd', '-t'], check=True)
-    print(f'Rsync SSH ready: user backup, directory {target}, SSH port 2222', flush=True)
-    os.execv('/usr/sbin/sshd', ['sshd', '-D', '-e'])
+    config = Path('/etc/ssh/sshd_config').read_text()
+    config = re.sub(r'^AllowUsers .*$', f'AllowUsers {username}', config, flags=re.MULTILINE)
+    Path('/run/sshd_config').write_text(config)
+    subprocess.run(['/usr/sbin/sshd', '-t', '-f', '/run/sshd_config'], check=True)
+    print(f'Rsync SSH ready: user {username}, directory {target}, SSH port 2222', flush=True)
+    os.execv('/usr/sbin/sshd', ['sshd', '-D', '-e', '-f', '/run/sshd_config'])
 
 try:
     main()

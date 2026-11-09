@@ -21,10 +21,12 @@ map:
   - type: media
     read_only: false
 options:
+  username: backup
   authorized_keys: []
   storage_root: /media/backup_disk
   directory: friend
 schema:
+  username: match(^[a-z_][a-z0-9_-]{0,31}$)
   authorized_keys:
     - str
   storage_root: str

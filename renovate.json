@@ -14,6 +14,13 @@
         "*"
       ],
       "separateMajorMinor": false
+    },
+    {
+      "matchPackageNames": [
+        "conventional-changelog-conventionalcommits"
+      ],
+      "allowedVersions": "<10",
+      "description": "Preset 10 requires writer 9; semantic-release 25 uses writer 8."
     }
   ]
 }

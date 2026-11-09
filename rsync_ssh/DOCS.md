@@ -5,6 +5,7 @@
 2. Configure the add-on with the client's public key and a folder name:
 
    ```yaml
+   username: backup
    authorized_keys:
      - "ssh-ed25519 AAAA... backups"
    storage_root: /media/backup_disk
@@ -13,7 +14,8 @@
 
 3. Start the add-on. It creates the folder with UID/GID `1000` and mode `700`.
    Use an empty folder or ensure existing files belong to UID/GID `1000`.
-4. Connect as **`backup`** on SSH port **`2222`**. Verify the host-key fingerprint
+4. Connect using `username` (default **`backup`**). Change the host SSH port
+   under the add-onâ€™s **Configuration â†’ Network** settings (default **`2222`**). Verify the host-key fingerprint
    against the add-on log on the first connection.
 
 To use internal storage temporarily, set `storage_root: /media` and `directory: backup`.
@@ -24,7 +26,7 @@ reconnecting it.
 
 # Usage
 
-Replace `HA_HOST` with your server address. Remote paths are relative to the
+Replace `HA_HOST` with your server address, and `backup`/`2222` if customized. Remote paths are relative to the
 configured folder. Add `-i /path/to/private_key` to the SSH command if needed.
 
 ```bash

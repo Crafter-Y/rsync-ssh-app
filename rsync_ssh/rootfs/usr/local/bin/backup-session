@@ -17,8 +17,8 @@ try:
     os.fchdir(fd)
     os.close(fd)
     original_path = str(os.getcwd())
-    env = {'PATH': '/usr/bin:/bin', 'HOME': '/var/empty', 'USER': 'backup',
-           'LOGNAME': 'backup', 'LANG': 'C.UTF-8', 'PYTHONDONTWRITEBYTECODE': '1',
+    env = {'PATH': '/usr/bin:/bin', 'HOME': '/var/empty', 'USER': settings['username'],
+           'LOGNAME': settings['username'], 'LANG': 'C.UTF-8', 'PYTHONDONTWRITEBYTECODE': '1',
            'SSH_ORIGINAL_COMMAND': command,
            'SSH_CONNECTION': os.environ.get('SSH_CONNECTION', '')}
     os.umask(0o077)

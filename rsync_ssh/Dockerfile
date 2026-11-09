@@ -20,7 +20,7 @@ RUN ./configure --prefix=/usr --disable-md2man \
 
 FROM ghcr.io/hassio-addons/base:21.0.9
 # hadolint ignore=DL3018
-RUN apk add --no-cache openssh-server openssh-keygen python3 acl-libs attr libcrypto3 libxxhash zstd-libs lz4-libs popt \
+RUN apk add --no-cache openssh-server openssh-keygen shadow python3 acl-libs attr libcrypto3 libxxhash zstd-libs lz4-libs popt \
     && addgroup -g 1000 backup \
     && adduser -D -H -u 1000 -G backup -h /var/empty -s /bin/ash backup \
     && mkdir -p /var/empty /etc/ssh/authorized_keys /run/sshd \
