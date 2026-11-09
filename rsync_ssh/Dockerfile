@@ -7,7 +7,7 @@ ARG RSYNC_VERSION=3.5.2
 ARG RSYNC_SHA256=a10d591825251e070f74c98df3daad195def4ed81b4a2de16169026aea33f6c8
 ADD --checksum=sha256:${RSYNC_SHA256} https://download.samba.org/pub/rsync/src/rsync-${RSYNC_VERSION}.tar.gz /tmp/rsync.tar.gz
 # hadolint ignore=DL3018
-RUN apk add --no-cache build-base pkgconf python3 acl-dev attr-dev openssl-dev xxhash-dev zstd-dev lz4-dev popt-dev \
+RUN apk add --no-cache build-base pkgconf python3 acl-dev attr-dev libidn2-dev openssl-dev xxhash-dev zstd-dev lz4-dev popt-dev \
     && mkdir /src \
     && tar -xzf /tmp/rsync.tar.gz -C /src --strip-components=1
 WORKDIR /src
@@ -20,7 +20,7 @@ RUN ./configure --prefix=/usr --disable-md2man \
 
 FROM ghcr.io/hassio-addons/base:21.0.9
 # hadolint ignore=DL3018
-RUN apk add --no-cache openssh-server openssh-keygen shadow python3 acl-libs attr libcrypto3 libxxhash zstd-libs lz4-libs popt \
+RUN apk add --no-cache openssh-server openssh-keygen shadow python3 acl-libs attr libidn2 libcrypto3 libxxhash zstd-libs lz4-libs popt \
     && addgroup -g 1000 backup \
     && adduser -D -H -u 1000 -G backup -h /var/empty -s /bin/ash backup \
     && mkdir -p /var/empty /etc/ssh/authorized_keys /run/sshd \
