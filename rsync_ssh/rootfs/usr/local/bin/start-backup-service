@@ -101,7 +101,7 @@ def main():
     Path('/run/sshd_config').write_text(config)
     subprocess.run(['/usr/sbin/sshd', '-t', '-f', '/run/sshd_config'], check=True)
     print(f'Rsync SSH ready: user {username}, directory {target}, SSH port 2222', flush=True)
-    os.execv('/usr/sbin/sshd', ['sshd', '-D', '-e', '-f', '/run/sshd_config'])
+    os.execv('/usr/sbin/sshd', ['/usr/sbin/sshd', '-D', '-e', '-f', '/run/sshd_config'])
 
 try:
     main()
