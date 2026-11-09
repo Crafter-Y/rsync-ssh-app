@@ -13,7 +13,9 @@
       "matchPackageNames": [
         "*"
       ],
-      "separateMajorMinor": false
+      "separateMajorMinor": false,
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "deps"
     },
     {
       "matchPackageNames": [
