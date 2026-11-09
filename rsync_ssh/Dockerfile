@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
-FROM ghcr.io/hassio-addons/base:21.0.9 AS rsync-build
+FROM ghcr.io/hassio-addons/base:21.0.11 AS rsync-build
 
 # Keep the matching restricted wrapper and rsync patched together.
 # Update the version and archive checksum together when upgrading rsync.
@@ -18,7 +18,7 @@ RUN ./configure --prefix=/usr --disable-md2man \
     && install -Dm644 COPYING /out/usr/share/licenses/rsync/COPYING \
     && install -Dm644 /tmp/rsync.tar.gz /out/usr/src/rsync.tar.gz
 
-FROM ghcr.io/hassio-addons/base:21.0.9
+FROM ghcr.io/hassio-addons/base:21.0.11
 # hadolint ignore=DL3018
 RUN apk add --no-cache openssh-server openssh-keygen shadow python3 acl-libs attr libidn2 libcrypto3 libxxhash zstd-libs lz4-libs popt \
     && addgroup -g 1000 backup \
