@@ -1,5 +1,5 @@
 name: Rsync SSH
-version: "1.0.2"
+version: "1.0.3"
 slug: rsync_ssh
 description: Key-authenticated, directory-restricted rsync backup storage over SSH
 url: https://github.com/Crafter-Y/rsync-ssh-app

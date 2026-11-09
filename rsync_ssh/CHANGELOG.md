@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.3
+
+
+### Bug Fixes
+
+* format release notes for HA and mark app stable ([91aa6db](https://github.com/Crafter-Y/rsync-ssh-app/commit/91aa6db5fe03fdaea9bf7534cf8dbec5a15cdcb2))
+
 ## 1.0.2
 
 ### Bug Fixes
