@@ -1,0 +1,93 @@
+#!/usr/bin/python3
+# SPDX-License-Identifier: GPL-2.0-only
+import base64
+import json
+import os
+from pathlib import Path
+import re
+import secrets
+import subprocess
+import sys
+import tempfile
+
+sys.path.insert(0, '/usr/local/lib')
+from rsync_ssh import SETTINGS, check_storage, open_directory
+
+def main():
+    os.umask(0o077)
+    options = json.loads(Path('/data/options.json').read_text())
+    root = options['storage_root']
+    directory = options['directory']
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,63}', directory):
+        raise ValueError('directory must be a simple folder name')
+    identity = check_storage(root)
+
+    keys = options['authorized_keys']
+    if not keys:
+        raise ValueError('configure at least one authorized_keys entry before starting')
+    allowed_types = {'ssh-ed25519', 'ssh-rsa', 'ecdsa-sha2-nistp256',
+                     'ecdsa-sha2-nistp384', 'ecdsa-sha2-nistp521',
+                     'sk-ssh-ed25519@openssh.com', 'sk-ecdsa-sha2-nistp256@openssh.com'}
+    output = []
+    for key in keys:
+        if not isinstance(key, str) or '\n' in key or '\r' in key:
+            raise ValueError('each authorized key must be one public-key line')
+        fields = key.split()
+        if len(fields) < 2 or fields[0] not in allowed_types:
+            raise ValueError('paste raw public keys without authorized_keys options')
+        base64.b64decode(fields[1], validate=True)
+        with tempfile.NamedTemporaryFile(mode='w') as handle:
+            handle.write(f'{fields[0]} {fields[1]}\n')
+            handle.flush()
+            result = subprocess.run(['ssh-keygen', '-l', '-f', handle.name],
+                                    check=True, capture_output=True, text=True)
+            if fields[0] == 'ssh-rsa' and int(result.stdout.split()[0]) < 3072:
+                raise ValueError('RSA keys must have at least 3072 bits; prefer Ed25519')
+        output.append(f'restrict {fields[0]} {fields[1]}\n')
+
+    target = Path(root) / directory
+    if not target.exists():
+        target.mkdir(mode=0o700)
+    fd = open_directory(root, directory, identity)
+    try:
+        if os.fstat(fd).st_uid not in (0, 1000):
+            raise ValueError('existing backup directory belongs to a different user')
+        os.fchown(fd, 1000, 1000)
+        os.fchmod(fd, 0o700)
+        if os.fstat(fd).st_uid != 1000 or os.fstat(fd).st_mode & 0o077:
+            raise ValueError('disk must support Unix ownership and permissions; use ext4')
+    finally:
+        os.close(fd)
+
+    Path('/etc/ssh/authorized_keys/backup').write_text(''.join(output))
+    Path('/etc/ssh/authorized_keys/backup').chmod(0o644)
+    SETTINGS.write_text(json.dumps({'root': root, 'directory': directory, 'identity': identity}))
+    SETTINGS.chmod(0o644)
+
+    # Alpine creates locked accounts. Set an unguessable discarded password;
+    # sshd still allows ONLY public-key authentication.
+    subprocess.run(['chpasswd'], input=f'backup:{secrets.token_urlsafe(64)}\n',
+                   text=True, check=True)
+    hostkeys = Path('/data/hostkeys')
+    hostkeys.mkdir(mode=0o700, exist_ok=True)
+    hostkeys.chmod(0o700)
+    for kind in ('ed25519', 'rsa'):
+        key = hostkeys / f'ssh_host_{kind}_key'
+        if not key.exists():
+            command = ['ssh-keygen', '-q', '-t', kind, '-N', '', '-f', str(key)]
+            if kind == 'rsa':
+                command.extend(['-b', '4096'])
+            subprocess.run(command, check=True)
+        key.chmod(0o600)
+        subprocess.run(['ssh-keygen', '-l', '-f', str(key)], check=True)
+
+    Path('/run/sshd').mkdir(mode=0o755, exist_ok=True)
+    subprocess.run(['/usr/sbin/sshd', '-t'], check=True)
+    print(f'Rsync SSH ready: user backup, directory {target}, SSH port 2222', flush=True)
+    os.execv('/usr/sbin/sshd', ['sshd', '-D', '-e'])
+
+try:
+    main()
+except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as error:
+    print(f'Rsync SSH refuses to start: {error}', file=sys.stderr)
+    sys.exit(1)

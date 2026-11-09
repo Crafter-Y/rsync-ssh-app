@@ -1,0 +1,4 @@
+#!/command/with-contenv sh
+# shellcheck shell=sh
+# SPDX-License-Identifier: GPL-2.0-only
+exec /usr/local/bin/start-backup-service

@@ -1,0 +1,30 @@
+#!/usr/bin/python3
+# SPDX-License-Identifier: GPL-2.0-only
+import json
+import os
+import sys
+
+sys.path.insert(0, '/usr/local/lib')
+from rsync_ssh import SETTINGS, open_directory
+
+try:
+    command = os.environ.get('SSH_ORIGINAL_COMMAND', '')
+    if not command.startswith('rsync --server '):
+        raise ValueError('this account supports rsync uploads, listings and restores only')
+    settings = json.loads(SETTINGS.read_text())
+    fd = open_directory(settings['root'], settings['directory'], settings['identity'])
+    # A directory descriptor pins the disk directory while entering it.
+    os.fchdir(fd)
+    os.close(fd)
+    original_path = str(os.getcwd())
+    env = {'PATH': '/usr/bin:/bin', 'HOME': '/var/empty', 'USER': 'backup',
+           'LOGNAME': 'backup', 'LANG': 'C.UTF-8', 'PYTHONDONTWRITEBYTECODE': '1',
+           'SSH_ORIGINAL_COMMAND': command,
+           'SSH_CONNECTION': os.environ.get('SSH_CONNECTION', '')}
+    os.umask(0o077)
+    # Validate the full rsync command with upstream's matching restricted wrapper.
+    # Symlinks round-trip, but cannot be followed on the backup server.
+    os.execve('/usr/bin/rrsync', ['rrsync', '-munge', original_path], env)
+except (OSError, ValueError, KeyError) as error:
+    print(f'Backup access denied: {error}', file=sys.stderr)
+    sys.exit(1)
