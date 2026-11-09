@@ -10,7 +10,7 @@ image: ghcr.io/crafter-y/{arch}-rsync-ssh
 init: false
 startup: services
 boot: auto
-stage: experimental
+stage: stable
 host_network: false
 apparmor: true
 ports:

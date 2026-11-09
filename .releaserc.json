@@ -13,13 +13,17 @@
     [
       "@semantic-release/release-notes-generator",
       {
-        "preset": "conventionalcommits"
+        "preset": "conventionalcommits",
+        "writerOpts": {
+          "headerPartial": "## {{version}}\n\n"
+        }
       }
     ],
     [
       "@semantic-release/changelog",
       {
-        "changelogFile": "rsync_ssh/CHANGELOG.md"
+        "changelogFile": "rsync_ssh/CHANGELOG.md",
+        "changelogTitle": "# Changelog"
       }
     ],
     [
