@@ -1,4 +1,4 @@
-{
+export default {
   "branches": [
     "main"
   ],
@@ -15,7 +15,7 @@
       {
         "preset": "conventionalcommits",
         "writerOpts": {
-          "headerPartial": "## {{version}}\n\n"
+          "headerPartial": ({ version }) => `## ${version}\n\n`
         }
       }
     ],
@@ -52,4 +52,4 @@
       }
     ]
   ]
-}
+};

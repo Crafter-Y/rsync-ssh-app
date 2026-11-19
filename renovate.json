@@ -4,6 +4,9 @@
     "config:recommended",
     ":disableDependencyDashboard"
   ],
+  "constraints": {
+    "npm": "^11.19.1"
+  },
   "semanticCommits": "enabled",
   "semanticCommitType": "fix",
   "semanticCommitScope": "deps",
@@ -16,13 +19,6 @@
       "separateMajorMinor": false,
       "semanticCommitType": "fix",
       "semanticCommitScope": "deps"
-    },
-    {
-      "matchPackageNames": [
-        "conventional-changelog-conventionalcommits"
-      ],
-      "allowedVersions": "<10",
-      "description": "Preset 10 requires writer 9; semantic-release 25 uses writer 8."
     }
   ]
 }
