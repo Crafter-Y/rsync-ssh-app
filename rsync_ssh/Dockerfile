@@ -6,8 +6,8 @@ FROM ghcr.io/hassio-addons/base:21.0.11 AS rsync-build
 ARG RSYNC_VERSION=3.5.2
 ARG RSYNC_SHA256=a10d591825251e070f74c98df3daad195def4ed81b4a2de16169026aea33f6c8
 ADD --checksum=sha256:${RSYNC_SHA256} https://download.samba.org/pub/rsync/src/rsync-${RSYNC_VERSION}.tar.gz /tmp/rsync.tar.gz
-# hadolint ignore=DL3018
 # Refresh the base image's pinned OpenSSL libraries to match openssl-dev.
+# hadolint ignore=DL3018
 RUN apk add --no-cache --upgrade libcrypto3 libssl3 build-base pkgconf python3 acl-dev attr-dev libidn2-dev openssl-dev xxhash-dev zstd-dev lz4-dev popt-dev \
     && mkdir /src \
     && tar -xzf /tmp/rsync.tar.gz -C /src --strip-components=1
