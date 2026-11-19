@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+### Bug Fixes
+
+* **deps:** update dependency semantic-release to v26 ([#2](https://github.com/Crafter-Y/rsync-ssh-app/issues/2)) ([a4bd314](https://github.com/Crafter-Y/rsync-ssh-app/commit/a4bd314028ec40d3dc5ccec3423f0da21889465c))
+
 ## 1.0.3
 
 
